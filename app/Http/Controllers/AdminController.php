@@ -172,4 +172,96 @@ class AdminController extends Controller
         ob_flush();
         return($isi);
     }
+    public function taksiran(){
+        $peng=DB::table('pengajar as p')->join('users as u','u.id','p.users_id')->select('u.*','p.fee')->where('u.role','pengajar')->orderBy('u.name');
+        return view('admin/taksiran',['peng'=>$peng]);
+    }
+    public function taksiranData(Request $request){
+        $id=$request->guru;
+        $month = date('m');
+        $peng=DB::table('pengajar as p')->join('users as u','u.id','p.users_id')->select('u.*','p.fee')->where('u.id',$id)->orderBy('u.name')->first();
+        $ab=DB::table('absen as a')->join('kelas as k','k.id','a.kelas_id')->select('a.*','k.nama')->where('a.users_id',$id)->whereMonth('a.masuk',$month);
+        $noo=1;
+        $isi='';
+        ob_start();
+        ?>
+        <table class="table table-responsive col-12 table-hovered table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <td class="font-weight-bold text-center">No</td>
+                                    <td class="font-weight-bold text-center">Kelas</td>
+                                    <td class="font-weight-bold text-center">Materi</td>
+                                    <td class="font-weight-bold text-center">Tanggal</td>
+                                    <td class="font-weight-bold text-center">Durasi</td>
+                                    <td class="font-weight-bold text-center">Fee</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+        <?php
+        if($ab->count()<1){
+            ?>
+            <tr>
+                <td colspan="6" class="text-center">Belum ada data ...</td>
+            </tr>
+            <?php
+        }else{
+            $tot=0;
+            foreach($ab->get() as $absen){
+                $jam = self::jam($absen->masuk,$absen->keluar)['jam'];
+                $menit = ceil(self::jam($absen->masuk,$absen->keluar)['menit']);
+                $fee=(int)self::fee($jam,$menit,$peng->fee)['fee'];
+                ?>
+                <tr>
+                    <td class="text-center"><?php echo $noo;?></td>
+                    <td><?php echo $absen->nama;?></td>
+                    <td><?php echo $absen->materi;?></td>
+                    <td class="text-center"><?php echo $absen->masuk;?></td>
+                    <td class="text-center"><?php echo self::fee($jam,$menit,$peng->fee)['waktu'];?></td>
+                    <td class="text-center"><?php echo self::rupiah($fee);?></td>
+                </tr>
+                <?php
+                $tot+=$fee;
+            }
+            ?>
+            <tr>
+                <td class="text-center font-weight-bold" colspan="5">Total Fee</td>
+                <td class="text-center font-weight-bold"><?php echo self::rupiah($tot);?></tr>
+            </tr>
+            </tbody>
+            </table>
+            <?php
+        }
+        
+        $isi=ob_get_clean();
+        ob_flush();
+        return($isi);
+    }
+    function fee($jam,$menit,$fee){
+        $permenit=$fee/60;
+        if($menit < 45){
+            $pe['fee']=$fee + ($permenit * $menit);
+        }else{
+            $pe['fee']=2*$fee;
+        }
+        if($menit==60){
+            $pe['waktu']=($jam+1)." jam ";
+        }else{
+            $pe['waktu']=$jam." jam ".$menit." menit";
+        }
+        return $pe;
+    }
+    function rupiah($angka){
+        $hasil_rupiah = "Rp " . number_format($angka,2,',','.');
+        return $hasil_rupiah;
+    }
+    function jam($aw, $ak){
+        $awal  = strtotime($aw); //waktu awal
+        $akhir = strtotime($ak); //waktu akhir
+        $diff  = $akhir - $awal;
+        $jame   = floor($diff / (60 * 60));
+        $menit = ($diff - $jame * (60 * 60))/60;
+        $jam['jam']=$jame;
+        $jam['menit']=$menit;
+        return $jam;
+    }
 }

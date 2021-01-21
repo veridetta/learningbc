@@ -36,6 +36,8 @@ Route::get('/admin/riwayat', [AdminController::class,'riwayat'])->middleware('ro
 Route::get('/admin/riwayat/data', [AdminController::class,'riwayatData'])->middleware('role:admin');
 Route::get('/admin/pantaukelas/', [AdminController::class,'pantau'])->middleware('role:admin');
 Route::post('/admin/pantaukelas/data', [AdminController::class,'pantauData'])->middleware('role:admin');
+Route::get('/admin/taksiran/', [AdminController::class,'taksiran'])->middleware('role:admin');
+Route::post('/admin/taksiran/data', [AdminController::class,'taksiranData'])->middleware('role:admin');
 /*Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');*/

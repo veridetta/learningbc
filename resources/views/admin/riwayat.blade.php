@@ -40,7 +40,7 @@
             <a href="/admin" class="btn btn-outline-primary" ><i class="fa fa-tachometer"></i> Dashboard</a>
             <a href="#" class="btn btn-warning" disabled><i class="fa fa-tachometer"></i> Riwayat Absensi</a>
             <a href="/admin/pantaukelas" class="btn btn-outline-danger"><i class="fa fa-tachometer"></i> Pantauan Kelas</a>
-            <a href="#" class="btn btn-outline-info"><i class="fa fa-tachometer"></i> Taksiran Penghasilan</a>
+            <a href="/admin/taksiran/" class="btn btn-outline-info"><i class="fa fa-tachometer"></i> Taksiran Penghasilan</a>
         </div>
     </div>
 </div>
