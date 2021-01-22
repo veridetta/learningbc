@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Imports\SiswaImport;
+use App\Models\SiswaModel;
+use App\Imports\NilaiImport;
+use App\Models\NilaiModel;
 
 class AdminController extends Controller
 {
@@ -236,6 +240,197 @@ class AdminController extends Controller
         ob_flush();
         return($isi);
     }
+
+    public function pendataan(Request $request){
+        $siswa = SiswaModel::all();
+        return view('admin/pendataan',['siswa'=>$siswa]);
+    }
+    public function siswaData(Request $request){
+        // The columns variable is used for sorting
+       $columns = array (
+           // datatable column index => database column name
+           
+           0 =>'nama',
+           1 =>'nis',
+           2 =>'kelas',
+           7 =>'id',
+       );
+       //init tanggal
+       $year=Date('Y');
+       $month=Date('m');
+       //Getting the data
+        $users = DB::table('siswa');
+       $totalData = $users->count ();            //Total record
+       $totalFiltered = $totalData;      // No filter at first so we can assign like this
+       // Here are the parameters sent from client for paging 
+       
+       if ($request->has ( 'offset' )) {
+           $start = $request->input ( 'offset' );           // Skip first start records
+           $no=$request->offset+1;
+       }else{
+           $start = 0;
+           $no=1;
+       }
+       $length = 10;   //  Get length record from start
+       /*
+       * Where Clause
+       */
+       if ($request->has ( 'search' )) {
+           if ($request->input ( 'search' ) != '') {
+               $searchTerm = $request->input ( 'search' );
+               /*
+               * Seach clause : we only allow to search on user_name field
+               */
+               $users->where ( 'nama', 'Like', '%' . $searchTerm . '%' );
+           }
+       }
+       /*
+       * Order By
+       */
+       // Data to client
+       $jobs = $users->skip ( $start )->take ( $length );
+       if ($request->has ( 'sort' )) {
+           if ($request->input ( 'sort' ) != '') {
+               $orderColumn = $request->input ( 'sort' );
+               $orderDirection = $request->input ( 'order' );
+               $jobs->orderBy ( $columns [intval ( $orderColumn )], $orderDirection );
+           }
+       }
+       // Get the real count after being filtered by Where Clause
+       $totalFiltered = $users->count ();
+       
+
+       /*
+       * Execute the query
+       */
+       $users = $users->get ();
+       /*
+       * We built the structure required by BootStrap datatables
+       */
+       $data = array ();
+       foreach ( $users as $user ) {
+           $nestedData = array ();
+           $nestedData ['no'] = $no;
+           $nestedData ['id'] = $user->id;
+           $nestedData ['nama'] = $user->nama;
+           $nestedData ['nis'] = $user->nis;
+           $nestedData ['kelas'] = $user->kelas;
+           $data [] = $nestedData;
+           $no++;
+       }
+       /*
+       * This below structure is required by Datatables
+       */ 
+       $tableContent = array (
+               "draw" => intval ( $request->input ( 'draw' ) ), // for every request/draw by clientside , they send a number as a parameter, when they recieve a response/data they first check the draw number, so we are sending same number in draw.
+               "total" => intval ( $totalData ), // total number of records
+               "totalNotFiltered" => intval ( $totalFiltered ), // total number of records after searching, if there is no searching then totalFiltered = totalData
+               "rows" => $data
+       );
+       return $tableContent;
+   }
+    public function penilaian(Request $request){
+        $nila = NilaiModel::all();
+        $nilai = $nila->groupBy('nama_tes');
+        return view('admin/penilaian',['nilai'=>$nila,'jumlah'=>$nilai]);
+    }
+    public function nilaiData(Request $request){
+        // The columns variable is used for sorting
+       $columns = array (
+           // datatable column index => database column name
+           
+           0 =>'nama',
+           1 =>'mapel',
+           2 =>'nilai1',
+           3 =>'nilai2',
+           4 =>'nilai3',
+           5 =>'nilai4',
+           6 =>'nilai5',
+           7 =>'kelas',
+           8 =>'id',
+       );
+       //init tanggal
+       $year=Date('Y');
+       $month=Date('m');
+       //Getting the data
+        $users = DB::table('nilai as n')->join('siswa as s','s.nis','n.nis')->select('n.id','n.nis','s.nama','n.nilai','n.mapel','s.kelas');
+        
+        //$nilai_induk = DB::table('nilai')->groupBy('nama_tes');
+        
+       $totalData = $users->count ();            //Total record
+       $totalFiltered = $totalData;      // No filter at first so we can assign like this
+       // Here are the parameters sent from client for paging 
+       
+       if ($request->has ( 'offset' )) {
+           $start = $request->input ( 'offset' );           // Skip first start records
+           $no=$request->offset+1;
+       }else{
+           $start = 0;
+           $no=1;
+       }
+       $length = 10;   //  Get length record from start
+       /*
+       * Where Clause
+       */
+       if ($request->has ( 'search' )) {
+           if ($request->input ( 'search' ) != '') {
+               $searchTerm = $request->input ( 'search' );
+               /*
+               * Seach clause : we only allow to search on user_name field
+               */
+               $users->where ( 's.nama', 'Like', '%' . $searchTerm . '%' );
+           }
+       }
+       /*
+       * Order By
+       */
+       // Data to client
+       $jobs = $users->skip ( $start )->take ( $length );
+       if ($request->has ( 'sort' )) {
+           if ($request->input ( 'sort' ) != '') {
+               $orderColumn = $request->input ( 'sort' );
+               $orderDirection = $request->input ( 'order' );
+               $jobs->orderBy ( $columns [intval ( $orderColumn )], $orderDirection );
+           }
+       }
+       // Get the real count after being filtered by Where Clause
+       $totalFiltered = $users->count ();
+       
+
+       /*
+       * Execute the query
+       */
+       $users = $users->get ();
+       /*
+       * We built the structure required by BootStrap datatables
+       */
+       $data = array ();
+       foreach ( $users as $user ) {
+           $nestedData = array ();
+           $nestedData ['no'] = $no;
+           $nestedData ['id'] = $user->id;
+           $nestedData ['nama'] = $user->nama;
+           $nestedData ['mapel'] = $user->mapel;
+           $nestedData ['kelas'] = $user->kelas;
+           $nestedData ['nilai1'] = $user->nilai;
+           $nestedData ['nilai2'] = '';
+           $nestedData ['nilai3'] = '';
+           $nestedData ['nilai4'] = '';
+           $nestedData ['nilai5'] = '';
+           $data [] = $nestedData;
+           $no++;
+       }
+       /*
+       * This below structure is required by Datatables
+       */ 
+       $tableContent = array (
+               "draw" => intval ( $request->input ( 'draw' ) ), // for every request/draw by clientside , they send a number as a parameter, when they recieve a response/data they first check the draw number, so we are sending same number in draw.
+               "total" => intval ( $totalData ), // total number of records
+               "totalNotFiltered" => intval ( $totalFiltered ), // total number of records after searching, if there is no searching then totalFiltered = totalData
+               "rows" => $data
+       );
+       return $tableContent;
+   }
     function fee($jam,$menit,$fee){
         $permenit=$fee/60;
         if($menit < 45){

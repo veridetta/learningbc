@@ -38,6 +38,7 @@
             <a href="/admin/riwayat" class="btn btn-outline-warning"><i class="fa fa-tachometer"></i> Riwayat Absensi</a>
             <a href="/admin/pantaukelas" class="btn btn-outline-danger"><i class="fa fa-tachometer"></i> Pantauan Kelas</a>
             <a href="/admin/taksiran/" class="btn btn-outline-info"><i class="fa fa-tachometer"></i> Taksiran Penghasilan</a>
+            <a href="/admin/pendataan/" class="btn btn-outline-primary"><i class="fa fa-list"></i> Pendataan</a>
         </div>
     </div>
 </div>

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AjaxPController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ImportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,12 @@ Route::get('/admin/pantaukelas/', [AdminController::class,'pantau'])->middleware
 Route::post('/admin/pantaukelas/data', [AdminController::class,'pantauData'])->middleware('role:admin');
 Route::get('/admin/taksiran/', [AdminController::class,'taksiran'])->middleware('role:admin');
 Route::post('/admin/taksiran/data', [AdminController::class,'taksiranData'])->middleware('role:admin');
+Route::get('/admin/pendataan', [AdminController::class,'pendataan'])->middleware('role:admin');
+Route::get('/admin/siswa/data', [AdminController::class,'siswaData'])->middleware('role:admin');
+Route::post('/admin/import/siswa', [ImportController::class,'import_siswa'])->middleware('role:admin');
+Route::get('/admin/penilaian', [AdminController::class,'penilaian'])->middleware('role:admin');
+Route::get('/admin/nilai/data', [AdminController::class,'nilaiData'])->middleware('role:admin');
+Route::post('/admin/import/penilaian', [ImportController::class,'import_penilaian'])->middleware('role:admin');
 /*Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');*/
